@@ -1,10 +1,10 @@
 import { MongoClient } from 'mongodb';
 
-const uri = process.env.MONGODB_URI || 'mongodb://dummy-uri-for-build';
+const uri = process.env.MONGODB_URI;
 const options = {};
 
-if (!process.env.MONGODB_URI && process.env.NODE_ENV !== 'development') {
-  console.warn('⚠️ MONGODB_URI is missing. Database features will be unavailable.');
+if (!uri) {
+  console.warn('⚠️ MONGODB_URI is not set. Database features will be unavailable.');
 }
 
 let client: MongoClient;
@@ -18,16 +18,22 @@ if (process.env.NODE_ENV === 'development') {
   };
 
   if (!globalWithMongo._mongoClientPromise) {
-    client = new MongoClient(uri, options);
+    client = new MongoClient(uri || 'mongodb://localhost:27017', options);
     globalWithMongo._mongoClientPromise = client.connect();
   }
   clientPromise = globalWithMongo._mongoClientPromise!;
 } else {
-  // In production mode, it's best to not use a global variable.
-  client = new MongoClient(uri, options);
-  clientPromise = client.connect();
+  // In production mode, create a lazy connection so errors surface properly.
+  if (!uri) {
+    // Return a promise that immediately rejects so the catch block in auth.ts fires
+    clientPromise = Promise.reject(new Error('MONGODB_URI environment variable is not set.'));
+  } else {
+    client = new MongoClient(uri, options);
+    clientPromise = client.connect();
+  }
 }
 
 // Export a module-scoped MongoClient promise. By doing this in a
 // separate module, the client can be shared across functions.
 export default clientPromise;
+
