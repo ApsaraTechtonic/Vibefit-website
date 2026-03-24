@@ -1,0 +1,67 @@
+Technical Requirements Document (TRD)
+1. Tech Stack (The "Vibe Coding" Suite)
+Framework: Next.js 14+ (App Router).
+
+Styling: Tailwind CSS (Custom config for Creme/White theme).
+
+Database & Auth: Supabase (PostgreSQL) for real-time data and easy social login.
+
+AI Orchestration: Vercel AI SDK (for streaming AI responses).
+
+Vision Processing: Google Cloud Vision API or Gemini 1.5 Pro (Multimodal).
+
+2. Database Schema (PostgreSQL)
+SQL
+-- Profiles: User metadata
+Table profiles {
+  id uuid primary_key
+  full_name text
+  target_weight float
+  daily_caloric_goal int
+}
+
+-- Logs: Daily snapshot
+Table daily_logs {
+  id uuid primary_key
+  user_id uuid
+  date date
+  weight float
+  weight_image_url text
+  medication_taken boolean
+  water_ml int
+  ai_daily_score int
+  ai_summary text
+}
+
+-- Exercises: Specific movements
+Table workouts {
+  id uuid primary_key
+  log_id uuid -- foreign key to daily_logs
+  exercise_name text
+  weight float
+  reps int
+  sets int
+}
+3. AI Logic & Prompt Engineering
+The Scoring Function: The backend will send the day's workouts, food_logs, and weight_change to the Gemini API with this system prompt:
+
+"You are a professional fitness coach. Analyze the user's data. If weight increased but gym volume (Sets x Reps x Weight) also increased, explain that this is likely muscle gain. Calculate a score out of 100 based on adherence to the goal."
+
+Image Processing Pipeline:
+
+User uploads image to Supabase Storage.
+
+Edge Function triggers Google Vision API (OCR).
+
+Regex extracts numbers (e.g., 72.5) from the text string.
+
+Value is returned to the UI for confirmation.
+
+4. Component Architecture
+Layout.tsx: The Creme-colored wrapper with the navigation.
+
+WeightCard.tsx: Displays current weight and a "Capture" button.
+
+StatGrid.tsx: Displays Calories, Gym Volume, and Score.
+
+LensScanner.tsx: A modal component that handles the camera feed and API call to the Vision model.

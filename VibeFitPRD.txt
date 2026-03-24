@@ -1,0 +1,44 @@
+Comprehensive Product Requirements Document (PRD)
+Project Title: VibeFit AI Vision: A minimalist, high-utility fitness companion that removes the friction of manual data entry through "Photo-First" logging.
+
+1. User Interface & Experience (UI/UX)
+Design System: * Primary Background: Creme (#FFFDD0 or #F5F5DC).
+
+Containers/Cards: Pure White (#FFFFFF) with soft rounded corners (24px) and subtle shadows.
+
+Typography: Playfair Display (Headings) and Inter (Body).
+
+Navigation: A bottom navigation bar for mobile-first use (Dashboard, Log, Analytics, Profile).
+
+2. Feature Breakdown
+A. The "Photo Log" Hub
+Scale Scanner: User takes a photo of their digital/analog scale. The app must extract the numerical value and auto-populate the weight field.
+
+Lens Integration: A "Scan" button that triggers the camera.
+
+Scenario A (Food): Identifies the dish (e.g., "Chicken Biryani") and estimates calories/macros.
+
+Scenario B (Gym): Identifies equipment (e.g., "Lat Pulldown Machine") and suggests 3 variations of exercises.
+
+B. The Workout Engine
+Input Fields: A repeater-style form where a user adds an exercise.
+
+Exercise Name (Autocomplete from a library).
+
+Weight (in kg/lbs).
+
+Reps (Count).
+
+Sets (Count).
+
+History: Ability to "Copy last workout" to save time.
+
+C. Medication & Water Tracker
+Daily Checklist: Simple toggle buttons for "Morning Meds," "Pre-workout," etc.
+
+Visual Indicator: A water droplet icon that fills up as the user logs intake.
+
+D. The AI Score & Insights
+Daily Score (0-100): A circular progress gauge on the home screen.
+
+Reasoning: A small "AI Coach" text box explaining why the score is X (e.g., "Your score is 85/100 because you hit your protein goal, but your sleep was inconsistent.").
