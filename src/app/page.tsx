@@ -1,65 +1,135 @@
-import Image from "next/image";
+import { Droplets, Pill, Utensils, Dumbbell, Scale } from "lucide-react";
+import { Greeting } from "@/components/Greeting";
+import { getSession } from "@/lib/session";
+import clientPromise from "@/lib/mongodb";
+import { redirect } from "next/navigation";
 
-export default function Home() {
+export default async function Home() {
+  const session = await getSession();
+  if (!session) redirect('/auth');
+
+  const client = await clientPromise;
+  const db = client.db('vibefit');
+
+  // Today's logs
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
+
+  const logs = await db.collection('logs').find({
+    userId: session.userId,
+    createdAt: { $gte: startOfDay }
+  }).toArray();
+
+  const { ObjectId } = require('mongodb');
+  const user = await db.collection('users').findOne({ _id: new ObjectId(session.userId) });
+  const firstName = user?.name ? user.name.split(' ')[0] : 'Creator';
+
+  const latestWeightLog = await db.collection('logs').findOne(
+    { userId: session.userId, type: 'weight' },
+    { sort: { createdAt: -1 } }
+  );
+  const currentWeight = latestWeightLog ? latestWeightLog.weight : null;
+  const weightText = currentWeight ? `${currentWeight}` : '---';
+
+  let waterCups = 0;
+  let workouts = 0;
+  let meals = 0;
+  let medsCount = 0;
+  let gymVolume = 0;
+
+  logs.forEach(log => {
+    if (log.type === 'water') waterCups += Number(log.cups) || 0;
+    if (log.type === 'food') meals += 1;
+    if (log.type === 'medication') medsCount += 1;
+    if (log.type === 'workout') {
+       workouts += 1;
+       log.exercises?.forEach((ex: any) => {
+          const w = Number(ex.weight) || 0;
+          const s = Number(ex.sets) || 0;
+          const r = Number(ex.reps) || 0;
+          gymVolume += (w * s * r);
+       });
+    }
+  });
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen p-6 pb-24 max-w-md mx-auto fade-in">
+      <header className="mb-8 mt-4">
+        <Greeting username={firstName} />
+        <p className="text-gray-500 mt-2 font-sans tracking-wide">Here is your daywise summary for today.</p>
+      </header>
+
+      <section className="space-y-4">
+        
+        {/* Weight */}
+        <div className="bg-card p-5 rounded-[24px] shadow-sm flex items-start gap-4 border border-gray-50 transition-all hover:shadow-md">
+          <div className="w-12 h-12 rounded-full bg-gray-100 text-gray-700 flex items-center justify-center shrink-0">
+            <Scale size={20} strokeWidth={2.5} />
+          </div>
+          <div className="flex-1">
+            <h4 className="font-heading font-semibold text-lg text-gray-800">Current Weight</h4>
+            <p className="font-sans text-sm text-gray-500 mt-0.5 max-w-[140px] truncate">{currentWeight ? 'Latest recorded' : 'Not logged yet'}</p>
+          </div>
+          <div className="font-heading font-bold text-2xl text-gray-800">{weightText}<span className="text-sm text-gray-400 font-sans ml-1 font-medium">kg</span></div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* Food */}
+        <div className="bg-card p-5 rounded-[24px] shadow-sm flex items-start gap-4 border border-gray-50 transition-all hover:shadow-md">
+           <div className="w-12 h-12 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center shrink-0">
+             <Utensils size={20} strokeWidth={2.5} />
+           </div>
+           <div className="flex-1">
+             <h4 className="font-heading font-semibold text-lg text-gray-800">Diet & Meals</h4>
+             <p className="font-sans text-sm text-gray-400 mt-1 italic">{meals === 0 ? 'No meals logged yet.' : `${meals} meals tracked`}</p>
+           </div>
+           <div className="font-heading font-bold text-2xl text-orange-400">
+             {meals}<span className="text-sm font-sans ml-1 font-medium text-gray-400">meals</span>
+           </div>
         </div>
-      </main>
+
+        {/* Exercises */}
+        <div className="bg-card p-5 rounded-[24px] shadow-sm flex items-start gap-4 border border-gray-50 transition-all hover:shadow-md">
+           <div className="w-12 h-12 rounded-full bg-purple-50 text-purple-500 flex items-center justify-center shrink-0">
+             <Dumbbell size={20} strokeWidth={2.5} />
+           </div>
+           <div className="flex-1">
+             <h4 className="font-heading font-semibold text-lg text-gray-800">Gym Activity</h4>
+             <p className="font-sans text-sm text-gray-400 mt-1 pb-1">{workouts === 0 ? 'No exercises logged.' : `Total Volume: ${gymVolume}kg`}</p>
+           </div>
+           <div className="font-heading font-bold text-2xl text-purple-400">
+             {workouts}<span className="text-sm font-sans ml-1 font-medium text-gray-400">workouts</span>
+           </div>
+        </div>
+
+        {/* Water */}
+        <div className="bg-card p-5 rounded-[24px] shadow-sm flex items-start gap-4 border border-gray-50 transition-all hover:shadow-md">
+           <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center shrink-0">
+             <Droplets size={20} strokeWidth={2.5} />
+           </div>
+           <div className="flex-1">
+             <h4 className="font-heading font-semibold text-lg text-gray-800">Hydration</h4>
+             <p className="font-sans text-sm text-gray-400 mt-1">{waterCups === 0 ? 'Not logged today' : 'Staying hydrated!'}</p>
+           </div>
+           <div className="font-heading font-bold text-2xl text-blue-400">
+              {waterCups}<span className="text-sm font-sans ml-1 font-medium text-gray-400">cups</span>
+           </div>
+        </div>
+
+        {/* Medicines */}
+        <div className="bg-card p-5 rounded-[24px] shadow-sm flex items-start gap-4 border border-gray-50 transition-all hover:shadow-md">
+           <div className="w-12 h-12 rounded-full bg-green-50 text-green-500 flex items-center justify-center shrink-0">
+             <Pill size={20} strokeWidth={2.5} />
+           </div>
+           <div className="flex-1">
+             <h4 className="font-heading font-semibold text-lg text-gray-800">Medications</h4>
+             <p className="font-sans text-sm text-gray-400 mt-1">{medsCount === 0 ? 'None taken' : `${medsCount} recorded`}</p>
+           </div>
+           <div className="font-heading font-bold text-2xl text-green-400">
+              {medsCount}
+           </div>
+        </div>
+
+      </section>
     </div>
   );
 }
