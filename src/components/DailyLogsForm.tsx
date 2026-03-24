@@ -15,6 +15,8 @@ export function DailyLogsForm() {
 
   const [foodItem, setFoodItem] = useState('');
   const [foodTime, setFoodTime] = useState('');
+  const [isLoggingFood, setIsLoggingFood] = useState(false);
+  const [foodInsight, setFoodInsight] = useState<{ calories: number; insight: string } | null>(null);
 
   const [medName, setMedName] = useState('');
   const [medDosage, setMedDosage] = useState('');
@@ -210,8 +212,36 @@ export function DailyLogsForm() {
               <input name="time" type="time" required value={foodTime} onChange={(e) => setFoodTime(e.target.value)} className={inputClass} />
             </div>
           </div>
-          <button type="submit" className="mt-4 w-full py-3 bg-orange-50 text-orange-600 rounded-[14px] font-sans font-bold tracking-wide uppercase text-xs flex items-center justify-center gap-2 hover:bg-orange-100 transition-colors">
-            <Plus size={16} strokeWidth={2.5} /> Log Food
+
+          {foodInsight && (
+            <div className="mt-4 p-3 bg-orange-50/50 border border-orange-100 rounded-xl animate-in fade-in slide-in-from-top-2">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                   <div className="w-5 h-5 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center">
+                     <Utensils size={12} strokeWidth={2.5} />
+                   </div>
+                   <span className="text-xs font-bold text-orange-700 uppercase tracking-wider">AI Estimate</span>
+                </div>
+                <div className="text-sm font-heading font-bold text-orange-600">
+                  {foodInsight.calories} <span className="text-[10px] font-sans text-orange-400">kcal</span>
+                </div>
+              </div>
+              <p className="mt-2 text-sm text-orange-800 font-medium italic">"{foodInsight.insight}"</p>
+            </div>
+          )}
+
+          <button 
+            type="submit" 
+            disabled={isLoggingFood}
+            className="mt-4 w-full py-3 bg-orange-50 text-orange-600 rounded-[14px] font-sans font-bold tracking-wide uppercase text-xs flex items-center justify-center gap-2 hover:bg-orange-100 transition-colors disabled:opacity-50"
+          >
+            {isLoggingFood ? (
+              <span className="animate-pulse">Estimating with AI...</span>
+            ) : (
+              <>
+                <Plus size={16} strokeWidth={2.5} /> Log Food
+              </>
+            )}
           </button>
         </form>
       </Card>

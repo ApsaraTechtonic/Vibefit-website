@@ -54,6 +54,10 @@ export async function logWeight(weight: number) {
   }
 }
 
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+
 export async function logFood(formData: FormData) {
   const session = await getSession();
   if (!session) return { error: 'Not logged in' };
@@ -62,6 +66,29 @@ export async function logFood(formData: FormData) {
   const time = formData.get('time') as string;
 
   if (!foodItem || !time) return { error: 'Missing fields' };
+
+  let calories = null;
+  let insight = null;
+
+  if (process.env.GEMINI_API_KEY) {
+    try {
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const prompt = `You are a nutrition AI. Estimate the calories for this food item: "${foodItem}". 
+      Return ONLY a JSON object like this: {"calories": 250, "insight": "A short 5-word healthy vibe"}. 
+      If unsure, estimate conservatively. No other text.`;
+      
+      const result = await model.generateContent(prompt);
+      const text = result.response.text();
+      const match = text.match(/\{.*\}/s);
+      if (match) {
+        const data = JSON.parse(match[0]);
+        calories = data.calories;
+        insight = data.insight;
+      }
+    } catch (err) {
+      console.error('AI Food Error:', err);
+    }
+  }
 
   try {
     const client = await clientPromise;
@@ -72,11 +99,13 @@ export async function logFood(formData: FormData) {
       type: 'food', 
       item: foodItem, 
       time,
+      calories,
+      aiInsight: insight,
       createdAt: new Date()
     });
 
     revalidatePath('/');
-    return { success: true };
+    return { success: true, calories, insight };
   } catch (err) {
     return { error: 'Failed to save.' };
   }

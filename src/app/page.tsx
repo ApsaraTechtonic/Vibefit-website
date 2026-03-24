@@ -36,10 +36,14 @@ export default async function Home() {
   let meals = 0;
   let medsCount = 0;
   let gymVolume = 0;
+  let totalCalories = 0;
 
   logs.forEach(log => {
     if (log.type === 'water') waterCups += Number(log.cups) || 0;
-    if (log.type === 'food') meals += 1;
+    if (log.type === 'food') {
+      meals += 1;
+      totalCalories += Number(log.calories) || 0;
+    }
     if (log.type === 'medication') medsCount += 1;
     if (log.type === 'workout') {
        workouts += 1;
@@ -82,9 +86,16 @@ export default async function Home() {
              <h4 className="font-heading font-semibold text-lg text-gray-800">Diet & Meals</h4>
              <p className="font-sans text-sm text-gray-400 mt-1 italic">{meals === 0 ? 'No meals logged yet.' : `${meals} meals tracked`}</p>
            </div>
-           <div className="font-heading font-bold text-2xl text-orange-400">
-             {meals}<span className="text-sm font-sans ml-1 font-medium text-gray-400">meals</span>
-           </div>
+            <div className="flex flex-col items-end">
+               <div className="font-heading font-bold text-2xl text-orange-400">
+                 {meals}<span className="text-sm font-sans ml-1 font-medium text-gray-400">meals</span>
+               </div>
+               {totalCalories > 0 && (
+                 <div className="text-[10px] font-sans font-bold text-orange-300 uppercase tracking-tighter">
+                   ~{totalCalories} kcal
+                 </div>
+               )}
+            </div>
         </div>
 
         {/* Exercises */}
