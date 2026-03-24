@@ -1,11 +1,11 @@
 import { MongoClient } from 'mongodb';
 
-if (!process.env.MONGODB_URI) {
-  throw new Error('Invalid/Missing environment variable: "MONGODB_URI"');
-}
-
-const uri = process.env.MONGODB_URI;
+const uri = process.env.MONGODB_URI || 'mongodb://dummy-uri-for-build';
 const options = {};
+
+if (!process.env.MONGODB_URI && process.env.NODE_ENV !== 'development') {
+  console.warn('⚠️ MONGODB_URI is missing. Database features will be unavailable.');
+}
 
 let client: MongoClient;
 let clientPromise: Promise<MongoClient>;

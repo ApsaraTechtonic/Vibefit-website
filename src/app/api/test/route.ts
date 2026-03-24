@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+export const dynamic = 'force-dynamic';
 import clientPromise from '@/lib/mongodb';
 import bcrypt from 'bcryptjs';
 import { createSession } from '@/lib/session';
