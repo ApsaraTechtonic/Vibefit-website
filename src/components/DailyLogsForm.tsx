@@ -94,12 +94,21 @@ export function DailyLogsForm() {
 
   const handleFood = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsLoggingFood(true);
+    setFoodInsight(null);
     const formData = new FormData(e.currentTarget);
     const res = await logFood(formData);
+    setIsLoggingFood(false);
+    
     if (res?.success) {
       setFoodItem('');
       setFoodTime('');
+      if (res.calories || res.insight) {
+        setFoodInsight({ calories: res.calories, insight: res.insight });
+      }
       showMsg('Food logged successfully!');
+    } else {
+      showMsg(res.error || 'Failed to log food.');
     }
   };
 
