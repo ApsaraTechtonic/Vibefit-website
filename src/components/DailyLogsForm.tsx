@@ -19,6 +19,7 @@ export function DailyLogsForm() {
   const [medName, setMedName] = useState('');
   const [medDosage, setMedDosage] = useState('');
   const [medTime, setMedTime] = useState('');
+  const [medCategory, setMedCategory] = useState<'morning' | 'noon' | 'night' | ''>('');
 
   const [message, setMessage] = useState('');
 
@@ -103,11 +104,13 @@ export function DailyLogsForm() {
   const handleMed = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
+    if (medCategory) formData.append('category', medCategory);
     const res = await logMedication(formData);
     if (res?.success) {
       setMedName('');
       setMedDosage('');
       setMedTime('');
+      setMedCategory('');
       showMsg('Medication logged successfully!');
     }
   };
@@ -226,6 +229,25 @@ export function DailyLogsForm() {
             <div>
               <label className={labelClass}>Medicine Name</label>
               <input name="name" type="text" required value={medName} onChange={(e) => setMedName(e.target.value)} placeholder="e.g. Vitamin D3" className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Time Slot</label>
+              <div className="flex gap-2">
+                {['morning', 'afternoon', 'night'].map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setMedCategory(cat as any)}
+                    className={`flex-1 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all border-2 ${
+                      medCategory === cat 
+                        ? 'bg-green-500 text-white border-green-500 shadow-sm' 
+                        : 'bg-white text-gray-400 border-gray-100 hover:border-gray-200'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>

@@ -3,6 +3,7 @@ import { getSession } from '@/lib/session';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 import { ProfileAvatarUpload } from '@/components/ProfileAvatarUpload';
+import { ChangePasswordForm } from '@/components/ChangePasswordForm';
 
 export default async function ProfilePage() {
   const session = await getSession();
@@ -24,6 +25,8 @@ export default async function ProfilePage() {
             <h2 className="text-2xl font-heading font-semibold">{user?.name || 'New User'}</h2>
             <p className="text-gray-500 text-sm font-sans mt-0.5 tracking-wide">{user?.email}</p>
         </div>
+
+        <ChangePasswordForm />
 
         <form action={signOut} className="w-full mt-4">
           <button 

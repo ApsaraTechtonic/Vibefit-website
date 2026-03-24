@@ -86,24 +86,26 @@ export async function logMedication(formData: FormData) {
   const session = await getSession();
   if (!session) return { error: 'Not logged in' };
 
-  const name = formData.get('name') as string;
-  const dosage = formData.get('dosage') as string;
-  const time = formData.get('time') as string;
-
-  if (!name || !dosage || !time) return { error: 'Missing fields' };
-
-  try {
-    const client = await clientPromise;
-    const db = client.db('vibefit');
-    
-    await db.collection('logs').insertOne({ 
-      userId: session.userId, 
-      type: 'medication', 
-      name, 
-      dosage,
-      time,
-      createdAt: new Date()
-    });
+    const name = formData.get('name') as string;
+    const dosage = formData.get('dosage') as string;
+    const time = formData.get('time') as string;
+    const category = formData.get('category') as string;
+  
+    if (!name || !dosage || !time) return { error: 'Missing fields' };
+  
+    try {
+      const client = await clientPromise;
+      const db = client.db('vibefit');
+      
+      await db.collection('logs').insertOne({ 
+        userId: session.userId, 
+        type: 'medication', 
+        name, 
+        dosage,
+        time,
+        category: category || 'any',
+        createdAt: new Date()
+      });
 
     revalidatePath('/');
     return { success: true };
