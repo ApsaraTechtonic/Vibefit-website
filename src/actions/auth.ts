@@ -27,6 +27,10 @@ export async function signUp(prevState: any, formData: FormData) {
     let pictureBase64 = null;
     const file = formData.get('picture') as File | null;
     if (file && file.size > 0) {
+      // Limit profile picture to 2MB to stay well within MongoDB's 16MB document limit
+      if (file.size > 2 * 1024 * 1024) {
+        return { error: 'Profile picture must be under 2MB. Please choose a smaller image.' };
+      }
       const buffer = await file.arrayBuffer();
       const base64 = Buffer.from(buffer).toString('base64');
       pictureBase64 = `data:${file.type};base64,${base64}`;
@@ -43,8 +47,9 @@ export async function signUp(prevState: any, formData: FormData) {
     });
 
     await createSession(result.insertedId.toString());
-  } catch (err) {
-    return { error: 'Something went wrong.' };
+  } catch (err: any) {
+    console.error('SignUp Error:', err);
+    return { error: err?.message || 'Something went wrong. Please try again.' };
   }
   
   return { success: true };
