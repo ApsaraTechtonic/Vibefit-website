@@ -58,7 +58,7 @@ export default function AITracker() {
                 setConfidence(data.confidence);
 
                 if (data.pose !== "Analyzing..." && data.pose !== lastSpoken) {
-                    let speech = new SpeechSynthesisUtterance(data.pose);
+                    const speech = new SpeechSynthesisUtterance(data.pose);
                     speech.rate = 1.1;
                     window.speechSynthesis.speak(speech);
                     lastSpoken = data.pose;
