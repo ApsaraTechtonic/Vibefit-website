@@ -10,7 +10,7 @@ export async function GET() {
     const db = client.db('vibefit');
     
     // Test DB read
-    const existingUser = await db.collection('users').findOne({ email: 'diagnose@test.com' });
+    await db.collection('users').findOne({ email: 'diagnose@test.com' });
     
     // Test bcrypt
     const hashedPassword = await bcrypt.hash('secretpassword', 10);
@@ -25,11 +25,12 @@ export async function GET() {
     await createSession(result.insertedId.toString());
     
     return NextResponse.json({ success: true, state: 'All systems go' });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const error = err as Error;
     return NextResponse.json({ 
-      error: String(err), 
-      message: err.message,
-      stack: err.stack 
+      error: String(error), 
+      message: error.message,
+      stack: error.stack 
     });
   }
 }

@@ -4,7 +4,7 @@ import clientPromise from '@/lib/mongodb';
 import { getSession } from '@/lib/session';
 import { revalidatePath } from 'next/cache';
 
-export async function logWorkout(exercises: any[]) {
+export async function logWorkout(exercises: unknown[]) {
   const session = await getSession();
   if (!session) return { error: 'Not logged in' };
 
@@ -25,7 +25,7 @@ export async function logWorkout(exercises: any[]) {
 
     revalidatePath('/');
     return { success: true };
-  } catch (err: any) {
+  } catch {
     return { error: 'Failed to save workout' };
   }
 }

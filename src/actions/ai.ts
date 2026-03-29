@@ -3,7 +3,6 @@
 import clientPromise from '@/lib/mongodb';
 import { getSession } from '@/lib/session';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { revalidatePath } from 'next/cache';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
@@ -33,19 +32,20 @@ export async function getDailyInsight() {
     }
 
     // Aggregate the user data into a readable summary for Gemini
-    const summary = logs.reduce((acc, log) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const summary = logs.reduce((acc: { water: number; meals: number; workouts: number; volume: number; latestWeight: number | null }, log: any) => {
       if (log.type === 'water') acc.water += Number(log.cups) || 0;
       if (log.type === 'food') acc.meals += 1;
       if (log.type === 'workout') {
          acc.workouts += 1;
-         log.exercises?.forEach((ex: any) => {
+         log.exercises?.forEach((ex: { weight?: number; sets?: number; reps?: number }) => {
             const w = Number(ex.weight) || 0;
             const s = Number(ex.sets) || 0;
             const r = Number(ex.reps) || 0;
             acc.volume += (w * s * r);
          });
       }
-      if (log.type === 'weight') acc.latestWeight = log.weight;
+      if (log.type === 'weight') acc.latestWeight = log.weight ?? null;
       return acc;
     }, { water: 0, meals: 0, workouts: 0, volume: 0, latestWeight: null });
 
@@ -62,7 +62,8 @@ Write a 2-3 sentence 'Daily Insight' providing actionable advice to improve thei
     const result = await model.generateContent(prompt);
     
     return { insight: result.response.text().trim() };
-  } catch (error: any) {
+  } catch (err: unknown) {
+    const error = err as Error;
     console.error('AI Insight Error:', error);
     return { insight: "Your AI coach is currently resting. Please check your API key or network connection." };
   }

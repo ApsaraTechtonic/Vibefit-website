@@ -18,7 +18,6 @@ export default function AuthPage() {
     const formData = new FormData(e.currentTarget);
     const action = isLogin ? signIn : signUp;
     
-    // @ts-ignore required workaround to bypass useFormState explicit param
     const result = await action(null, formData);
     
     if (result && 'error' in result && result.error) {

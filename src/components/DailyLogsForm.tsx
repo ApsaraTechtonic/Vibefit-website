@@ -73,7 +73,7 @@ export function DailyLogsForm() {
             showMsg("AI couldn't read numbers. Try again.");
           }
         }
-      } catch (err) {
+      } catch {
         showMsg("Network error.");
       }
       setIsScanningScale(false);
@@ -235,7 +235,7 @@ export function DailyLogsForm() {
                   {foodInsight.calories} <span className="text-[10px] font-sans text-orange-400">kcal</span>
                 </div>
               </div>
-              <p className="mt-2 text-sm text-orange-800 font-medium italic">"{foodInsight.insight}"</p>
+              <p className="mt-2 text-sm text-orange-800 font-medium italic">&quot;{foodInsight.insight}&quot;</p>
             </div>
           )}
 
@@ -276,7 +276,7 @@ export function DailyLogsForm() {
                   <button
                     key={cat}
                     type="button"
-                    onClick={() => setMedCategory(cat as any)}
+                    onClick={() => setMedCategory(cat as 'morning' | 'noon' | 'night' | '')}
                     className={`flex-1 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all border-2 ${
                       medCategory === cat 
                         ? 'bg-green-500 text-white border-green-500 shadow-sm' 

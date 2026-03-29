@@ -5,7 +5,7 @@ import clientPromise from '@/lib/mongodb';
 import { createSession, logout } from '@/lib/session';
 import { redirect } from 'next/navigation';
 
-export async function signUp(prevState: any, formData: FormData) {
+export async function signUp(_prevState: unknown, formData: FormData) {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
   
@@ -47,15 +47,16 @@ export async function signUp(prevState: any, formData: FormData) {
     });
 
     await createSession(result.insertedId.toString());
-  } catch (err: any) {
-    console.error('SignUp Error:', err);
-    return { error: err?.message || 'Something went wrong. Please try again.' };
+  } catch (err: unknown) {
+    const error = err as Error;
+    console.error('SignUp Error:', error);
+    return { error: error?.message || 'Something went wrong. Please try again.' };
   }
   
   return { success: true };
 }
 
-export async function signIn(prevState: any, formData: FormData) {
+export async function signIn(_prevState: unknown, formData: FormData) {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
 
@@ -78,9 +79,10 @@ export async function signIn(prevState: any, formData: FormData) {
     }
 
     await createSession(user._id.toString());
-  } catch (err: any) {
-    console.error('Auth Error:', err);
-    return { error: err.message || 'Something went wrong.' };
+  } catch (err: unknown) {
+    const error = err as Error;
+    console.error('Auth Error:', error);
+    return { error: error.message || 'Something went wrong.' };
   }
 
   return { success: true };

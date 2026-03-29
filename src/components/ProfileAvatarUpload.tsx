@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import { updateProfilePicture } from '@/actions/profile';
 import { Upload } from 'lucide-react';
+import Image from 'next/image';
 
 export function ProfileAvatarUpload({ currentAvatar }: { currentAvatar?: string }) {
   const fileRef = useRef<HTMLInputElement>(null);
@@ -30,7 +31,7 @@ export function ProfileAvatarUpload({ currentAvatar }: { currentAvatar?: string 
         onClick={() => fileRef.current?.click()}
       >
          {currentAvatar ? (
-             <img src={currentAvatar} alt="Profile" className="w-full h-full object-cover" />
+             <Image src={currentAvatar} alt="Profile" width={96} height={96} className="w-full h-full object-cover" />
          ) : (
            <svg className="w-8 h-8 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
          )}

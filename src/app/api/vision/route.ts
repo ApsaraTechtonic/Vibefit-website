@@ -33,7 +33,8 @@ export async function POST(req: Request) {
     const responseText = result.response.text();
 
     return NextResponse.json({ success: true, result: responseText.trim() });
-  } catch (error: any) {
+  } catch (err: unknown) {
+    const error = err as Error;
     console.error('Gemini API Error:', error);
     return NextResponse.json({ error: error.message || 'AI processing failed' }, { status: 500 });
   }

@@ -27,7 +27,7 @@ export async function logWater(formData: FormData) {
 
     revalidatePath('/');
     return { success: true };
-  } catch (err) {
+  } catch {
     return { error: 'Failed to save.' };
   }
 }
@@ -49,7 +49,7 @@ export async function logWeight(weight: number) {
 
     revalidatePath('/');
     return { success: true };
-  } catch (err) {
+  } catch {
     return { error: 'Failed to save weight.' };
   }
 }
@@ -106,7 +106,7 @@ export async function logFood(formData: FormData) {
 
     revalidatePath('/');
     return { success: true, calories, insight };
-  } catch (err) {
+  } catch {
     return { error: 'Failed to save.' };
   }
 }
@@ -138,7 +138,7 @@ export async function logMedication(formData: FormData) {
 
     revalidatePath('/');
     return { success: true };
-  } catch (err) {
+  } catch {
     return { error: 'Failed to save.' };
   }
 }

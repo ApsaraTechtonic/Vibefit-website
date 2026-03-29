@@ -1,8 +1,11 @@
+
 import { Droplets, Pill, Utensils, Dumbbell, Scale } from "lucide-react";
 import { Greeting } from "@/components/Greeting";
 import { getSession } from "@/lib/session";
 import clientPromise from "@/lib/mongodb";
 import { redirect } from "next/navigation";
+import { ObjectId } from "mongodb";
+import AITracker from '@/components/AITracker';
 
 export default async function Home() {
   const session = await getSession();
@@ -20,7 +23,6 @@ export default async function Home() {
     createdAt: { $gte: startOfDay }
   }).toArray();
 
-  const { ObjectId } = require('mongodb');
   const user = await db.collection('users').findOne({ _id: new ObjectId(session.userId) });
   const firstName = user?.name ? user.name.split(' ')[0] : 'Creator';
 
@@ -38,7 +40,8 @@ export default async function Home() {
   let gymVolume = 0;
   let totalCalories = 0;
 
-  logs.forEach(log => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  logs.forEach((log: any) => {
     if (log.type === 'water') waterCups += Number(log.cups) || 0;
     if (log.type === 'food') {
       meals += 1;
@@ -46,13 +49,13 @@ export default async function Home() {
     }
     if (log.type === 'medication') medsCount += 1;
     if (log.type === 'workout') {
-       workouts += 1;
-       log.exercises?.forEach((ex: any) => {
-          const w = Number(ex.weight) || 0;
-          const s = Number(ex.sets) || 0;
-          const r = Number(ex.reps) || 0;
-          gymVolume += (w * s * r);
-       });
+      workouts += 1;
+      log.exercises?.forEach((ex: { weight?: number; sets?: number; reps?: number }) => {
+        const w = Number(ex.weight) || 0;
+        const s = Number(ex.sets) || 0;
+        const r = Number(ex.reps) || 0;
+        gymVolume += (w * s * r);
+      });
     }
   });
 
@@ -64,7 +67,7 @@ export default async function Home() {
       </header>
 
       <section className="space-y-4">
-        
+
         {/* Weight */}
         <div className="bg-card p-5 rounded-[24px] shadow-sm flex items-start gap-4 border border-gray-50 transition-all hover:shadow-md">
           <div className="w-12 h-12 rounded-full bg-gray-100 text-gray-700 flex items-center justify-center shrink-0">
@@ -79,67 +82,71 @@ export default async function Home() {
 
         {/* Food */}
         <div className="bg-card p-5 rounded-[24px] shadow-sm flex items-start gap-4 border border-gray-50 transition-all hover:shadow-md">
-           <div className="w-12 h-12 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center shrink-0">
-             <Utensils size={20} strokeWidth={2.5} />
-           </div>
-           <div className="flex-1">
-             <h4 className="font-heading font-semibold text-lg text-gray-800">Diet & Meals</h4>
-             <p className="font-sans text-sm text-gray-400 mt-1 italic">{meals === 0 ? 'No meals logged yet.' : `${meals} meals tracked`}</p>
-           </div>
-            <div className="flex flex-col items-end">
-               <div className="font-heading font-bold text-2xl text-orange-400">
-                 {meals}<span className="text-sm font-sans ml-1 font-medium text-gray-400">meals</span>
-               </div>
-               {totalCalories > 0 && (
-                 <div className="text-[10px] font-sans font-bold text-orange-300 uppercase tracking-tighter">
-                   ~{totalCalories} kcal
-                 </div>
-               )}
+          <div className="w-12 h-12 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center shrink-0">
+            <Utensils size={20} strokeWidth={2.5} />
+          </div>
+          <div className="flex-1">
+            <h4 className="font-heading font-semibold text-lg text-gray-800">Diet & Meals</h4>
+            <p className="font-sans text-sm text-gray-400 mt-1 italic">{meals === 0 ? 'No meals logged yet.' : `${meals} meals tracked`}</p>
+          </div>
+          <div className="flex flex-col items-end">
+            <div className="font-heading font-bold text-2xl text-orange-400">
+              {meals}<span className="text-sm font-sans ml-1 font-medium text-gray-400">meals</span>
             </div>
+            {totalCalories > 0 && (
+              <div className="text-[10px] font-sans font-bold text-orange-300 uppercase tracking-tighter">
+                ~{totalCalories} kcal
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Exercises */}
         <div className="bg-card p-5 rounded-[24px] shadow-sm flex items-start gap-4 border border-gray-50 transition-all hover:shadow-md">
-           <div className="w-12 h-12 rounded-full bg-purple-50 text-purple-500 flex items-center justify-center shrink-0">
-             <Dumbbell size={20} strokeWidth={2.5} />
-           </div>
-           <div className="flex-1">
-             <h4 className="font-heading font-semibold text-lg text-gray-800">Gym Activity</h4>
-             <p className="font-sans text-sm text-gray-400 mt-1 pb-1">{workouts === 0 ? 'No exercises logged.' : `Total Volume: ${gymVolume}kg`}</p>
-           </div>
-           <div className="font-heading font-bold text-2xl text-purple-400">
-             {workouts}<span className="text-sm font-sans ml-1 font-medium text-gray-400">workouts</span>
-           </div>
+          <div className="w-12 h-12 rounded-full bg-purple-50 text-purple-500 flex items-center justify-center shrink-0">
+            <Dumbbell size={20} strokeWidth={2.5} />
+          </div>
+          <div className="flex-1">
+            <h4 className="font-heading font-semibold text-lg text-gray-800">Gym Activity</h4>
+            <p className="font-sans text-sm text-gray-400 mt-1 pb-1">{workouts === 0 ? 'No exercises logged.' : `Total Volume: ${gymVolume}kg`}</p>
+          </div>
+          <div className="font-heading font-bold text-2xl text-purple-400">
+            {workouts}<span className="text-sm font-sans ml-1 font-medium text-gray-400">workouts</span>
+          </div>
         </div>
 
         {/* Water */}
         <div className="bg-card p-5 rounded-[24px] shadow-sm flex items-start gap-4 border border-gray-50 transition-all hover:shadow-md">
-           <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center shrink-0">
-             <Droplets size={20} strokeWidth={2.5} />
-           </div>
-           <div className="flex-1">
-             <h4 className="font-heading font-semibold text-lg text-gray-800">Hydration</h4>
-             <p className="font-sans text-sm text-gray-400 mt-1">{waterCups === 0 ? 'Not logged today' : 'Staying hydrated!'}</p>
-           </div>
-           <div className="font-heading font-bold text-2xl text-blue-400">
-              {waterCups}<span className="text-sm font-sans ml-1 font-medium text-gray-400">cups</span>
-           </div>
+          <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center shrink-0">
+            <Droplets size={20} strokeWidth={2.5} />
+          </div>
+          <div className="flex-1">
+            <h4 className="font-heading font-semibold text-lg text-gray-800">Hydration</h4>
+            <p className="font-sans text-sm text-gray-400 mt-1">{waterCups === 0 ? 'Not logged today' : 'Staying hydrated!'}</p>
+          </div>
+          <div className="font-heading font-bold text-2xl text-blue-400">
+            {waterCups}<span className="text-sm font-sans ml-1 font-medium text-gray-400">cups</span>
+          </div>
         </div>
 
         {/* Medicines */}
         <div className="bg-card p-5 rounded-[24px] shadow-sm flex items-start gap-4 border border-gray-50 transition-all hover:shadow-md">
-           <div className="w-12 h-12 rounded-full bg-green-50 text-green-500 flex items-center justify-center shrink-0">
-             <Pill size={20} strokeWidth={2.5} />
-           </div>
-           <div className="flex-1">
-             <h4 className="font-heading font-semibold text-lg text-gray-800">Medications</h4>
-             <p className="font-sans text-sm text-gray-400 mt-1">{medsCount === 0 ? 'None taken' : `${medsCount} recorded`}</p>
-           </div>
-           <div className="font-heading font-bold text-2xl text-green-400">
-              {medsCount}
-           </div>
+          <div className="w-12 h-12 rounded-full bg-green-50 text-green-500 flex items-center justify-center shrink-0">
+            <Pill size={20} strokeWidth={2.5} />
+          </div>
+          <div className="flex-1">
+            <h4 className="font-heading font-semibold text-lg text-gray-800">Medications</h4>
+            <p className="font-sans text-sm text-gray-400 mt-1">{medsCount === 0 ? 'None taken' : `${medsCount} recorded`}</p>
+          </div>
+          <div className="font-heading font-bold text-2xl text-green-400">
+            {medsCount}
+          </div>
         </div>
 
+        {/* Live AI Tracker */}
+        <div className="mt-8">
+          <AITracker />
+        </div>
       </section>
     </div>
   );

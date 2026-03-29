@@ -1,6 +1,6 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  serverExternalPackages: ['mongodb'],
   experimental: {
     serverActions: {
       bodySizeLimit: '6mb',

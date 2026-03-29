@@ -59,7 +59,7 @@ export function LensScanner({ isOpen, onClose }: { isOpen: boolean, onClose: () 
         } else {
            alert(data.error || "Failed to process image.");
         }
-      } catch (err) {
+      } catch {
         alert("Network error processing image.");
       }
       setScanning(false);

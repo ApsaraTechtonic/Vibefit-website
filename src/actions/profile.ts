@@ -35,7 +35,7 @@ export async function updatePassword(formData: FormData) {
     );
 
     return { success: true };
-  } catch (err: any) {
+  } catch {
     return { error: 'Failed to update password.' };
   }
 }
@@ -64,7 +64,7 @@ export async function updateProfilePicture(formData: FormData) {
 
     revalidatePath('/profile');
     return { success: true };
-  } catch (err: any) {
+  } catch {
     return { error: 'Failed to update profile picture.' };
   }
 }
